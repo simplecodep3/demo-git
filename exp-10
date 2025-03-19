@@ -1,0 +1,56 @@
+-- 1. Create a new user
+CREATE USER new_user IDENTIFIED BY 'password123';
+
+-- 2. Grant all privileges on EMP table to the user
+GRANT ALL PRIVILEGES ON EMP TO new_user;
+
+-- 3. Revoke some privileges from the user (e.g., DELETE and UPDATE)
+REVOKE DELETE, UPDATE ON EMP FROM new_user;
+
+-- 4. Create a role ‘custom’ with all privileges on DEPT and some on EMP
+CREATE ROLE custom;
+GRANT ALL PRIVILEGES ON DEPT TO custom;
+GRANT SELECT, INSERT, UPDATE ON EMP TO custom;
+
+-- 5. Grant role ‘custom’ to the user
+GRANT custom TO new_user;
+
+-- 6. Revoke some privileges of EMP table from the role
+REVOKE INSERT, UPDATE ON EMP FROM custom;
+
+-- 7. Create a new tablespace named "USER_DATA"
+CREATE TABLESPACE USER_DATA 
+DATAFILE 'user_data.dbf' 
+SIZE 50M AUTOEXTEND ON;
+
+-- 8. Define a temporary tablespace
+CREATE TEMPORARY TABLESPACE temp_data 
+TEMPFILE 'temp_data.dbf' 
+SIZE 50M AUTOEXTEND ON;
+
+-- 9. Create a user account and set a custom password
+CREATE USER test_user IDENTIFIED BY 'Test@123';
+
+-- 10. Change the password of an existing user
+ALTER USER test_user IDENTIFIED BY 'NewPassword@123';
+
+-- 11. Expire the password of a user and force password change
+ALTER USER test_user PASSWORD EXPIRE;
+
+-- 12. Create a new role "DATA_ACCESS" with specific privileges
+CREATE ROLE DATA_ACCESS;
+GRANT SELECT, INSERT, UPDATE ON EMP TO DATA_ACCESS;
+GRANT SELECT ON DEPT TO DATA_ACCESS;
+
+-- 13. Grant the "DATA_ACCESS" role to a user
+GRANT DATA_ACCESS TO test_user;
+
+-- 14. Revoke the "DATA_ACCESS" role from a user
+REVOKE DATA_ACCESS FROM test_user;
+
+-- 15. Create a new role "EMPLOYEE_ACCESS" with privileges on EMP table
+CREATE ROLE EMPLOYEE_ACCESS;
+GRANT SELECT, INSERT ON EMP TO EMPLOYEE_ACCESS;
+
+-- 16. Revoke specific privileges from the "EMPLOYEE_ACCESS" role
+REVOKE INSERT ON EMP FROM EMPLOYEE_ACCESS;
