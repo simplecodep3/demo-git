@@ -1,0 +1,120 @@
+-- Create a sample table for demonstration
+CREATE TABLE TRANSACTION_TEST (
+    ID NUMBER(6) PRIMARY KEY,
+    NAME VARCHAR2(50),
+    SALARY NUMBER(10,2)
+);
+
+-- Insert initial data
+INSERT INTO TRANSACTION_TEST VALUES (1, 'John', 50000);
+INSERT INTO TRANSACTION_TEST VALUES (2, 'Alice', 60000);
+COMMIT;
+
+-- 1. Implement a save point
+BEGIN;
+UPDATE TRANSACTION_TEST SET SALARY = 55000 WHERE ID = 1;
+SAVEPOINT SP1;
+
+-- 2. Implement rollback
+ROLLBACK TO SP1; -- This rolls back changes after SP1 but keeps earlier transactions.
+
+-- 3. Implement commit
+COMMIT; -- This saves the changes made before rollback.
+
+-- 4. Implement a save point named "SP1" and roll back to it
+BEGIN;
+UPDATE TRANSACTION_TEST SET SALARY = 70000 WHERE ID = 2;
+SAVEPOINT SP1;
+ROLLBACK TO SP1;
+COMMIT;
+
+-- 5. Create a save point "SP2" and roll back to it
+BEGIN;
+UPDATE TRANSACTION_TEST SET SALARY = 80000 WHERE ID = 2;
+SAVEPOINT SP2;
+ROLLBACK TO SP2;
+COMMIT;
+
+-- 6. Create two save points and roll back to SP1, then commit remaining
+BEGIN;
+UPDATE TRANSACTION_TEST SET SALARY = 90000 WHERE ID = 2;
+SAVEPOINT SP1;
+UPDATE TRANSACTION_TEST SET SALARY = 100000 WHERE ID = 1;
+SAVEPOINT SP2;
+ROLLBACK TO SP1;
+COMMIT;
+
+-- 7. Use save points to manage partial rollbacks
+BEGIN;
+UPDATE TRANSACTION_TEST SET SALARY = 75000 WHERE ID = 1;
+SAVEPOINT SP1;
+UPDATE TRANSACTION_TEST SET SALARY = 85000 WHERE ID = 2;
+ROLLBACK TO SP1;  -- Rolls back the second update but keeps the first.
+COMMIT;
+
+-- 8. Show the difference between rollback with and without save points
+BEGIN;
+UPDATE TRANSACTION_TEST SET SALARY = 95000 WHERE ID = 1;
+SAVEPOINT SP1;
+UPDATE TRANSACTION_TEST SET SALARY = 105000 WHERE ID = 2;
+ROLLBACK;  -- This rolls back everything since BEGIN
+COMMIT;
+
+-- 9. Initiate a transaction and rollback all changes
+BEGIN;
+UPDATE TRANSACTION_TEST SET SALARY = 120000 WHERE ID = 1;
+UPDATE TRANSACTION_TEST SET SALARY = 130000 WHERE ID = 2;
+ROLLBACK; -- Undo all changes
+COMMIT;
+
+-- 10. Perform a series of updates and rollback
+BEGIN;
+UPDATE TRANSACTION_TEST SET SALARY = 140000 WHERE ID = 1;
+UPDATE TRANSACTION_TEST SET SALARY = 150000 WHERE ID = 2;
+ROLLBACK;
+COMMIT;
+
+-- 11. Insert records and commit
+BEGIN;
+INSERT INTO TRANSACTION_TEST VALUES (3, 'Bob', 70000);
+INSERT INTO TRANSACTION_TEST VALUES (4, 'Emma', 75000);
+COMMIT;
+
+-- 12. Make changes and commit the transaction
+BEGIN;
+UPDATE TRANSACTION_TEST SET SALARY = 80000 WHERE ID = 3;
+COMMIT;
+
+-- 13. Commit changes in one transaction and rollback in another
+BEGIN;
+INSERT INTO TRANSACTION_TEST VALUES (5, 'Mike', 60000);
+SAVEPOINT SP1;
+DELETE FROM TRANSACTION_TEST WHERE ID = 4;
+ROLLBACK TO SP1;  -- Undo deletion, but keep insertion
+COMMIT;
+
+-- 14. Update two related tables, but rollback one
+BEGIN;
+UPDATE TRANSACTION_TEST SET SALARY = 90000 WHERE ID = 3;
+SAVEPOINT SP1;
+UPDATE TRANSACTION_TEST SET SALARY = 95000 WHERE ID = 4;
+ROLLBACK TO SP1;  -- Undo only the second update
+COMMIT;
+
+-- 15. Demonstrate rollback and commit in a nested transaction
+BEGIN;
+UPDATE TRANSACTION_TEST SET SALARY = 100000 WHERE ID = 3;
+SAVEPOINT SP1;
+BEGIN;
+    UPDATE TRANSACTION_TEST SET SALARY = 105000 WHERE ID = 4;
+    ROLLBACK TO SP1;  -- Nested rollback
+END;
+COMMIT;
+
+-- 16. Rollback deletion but keep other changes
+BEGIN;
+UPDATE TRANSACTION_TEST SET SALARY = 110000 WHERE ID = 3;
+SAVEPOINT SP1;
+DELETE FROM TRANSACTION_TEST WHERE ID = 4;
+ROLLBACK TO SP1;  -- Undo the deletion
+COMMIT;
